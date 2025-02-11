@@ -222,11 +222,11 @@ LongNum& LongNum::operator-=(const LongNum &rhs) {
     for (size_t i = 0; i < rhs.limbs.size() || carry; i++) {
         if (i < rhs.limbs.size()) {
             const unsigned new_carry = limbs[i] < rhs.limbs[i] || (limbs[i] == rhs.limbs[i] && carry);  // TODO: optimize carry calculation here
-            carry = new_carry;
             limbs[i] -= rhs.limbs[i] + carry;
+            carry = new_carry;
         } else {
             limbs[i] -= carry;
-            carry = (limbs[i] == ((uint64_t) 1 << base) - 1);
+            carry = (limbs[i] == (UINT32_MAX);
         }
     }
     remove_leading_zeros();

@@ -278,54 +278,59 @@ LongNum& LongNum::operator/=(const LongNum &rhs) {
 }
 
 LongNum operator/(LongNum lhs, const LongNum &rhs) {
-    auto div_one_digit = [](LongNum a, const LongNum &b) {
+    auto div_one_digit = [](LongNum a, const LongNum &b, LongNum& res) {
         // divide a / b as integers (ignoring exp and sign), len(b) = 1
 
+        const uint32_t remainder = a.limbs.front() % b.limbs.front();
         unsigned carry = 0;
         for (size_t i = a.limbs.size() - 1; i != (size_t)-1; i--) {
             const uint64_t cur = a.limbs[i] + ((uint64_t)carry << LongNum::base);
             a.limbs[i] = cur / b.limbs.front();
             carry = cur - a.limbs[i] * b.limbs.front();
         }
-        a.remove_leading_zeros();
-        return a;
+        res = a;
+        return remainder != 0;
     };
 
-    auto long_div = [](const LongNum &a, const LongNum &b) {
+    auto long_div = [](LongNum u_num, LongNum v_num, LongNum& res) {
         // source: https://skanthak.hier-im-netz.de/division.html
         // divide a / b as integers (ignoring exp and sign), a >= b, len(b) >= 2
 
-        const size_t m = a.limbs.size(), n = b.limbs.size();  // initial sizes
-        const unsigned s = std::countl_zero(b.limbs.back());  // normalization (make first bit of divisor set to 1)
-        LongNum u_num = a << s, v_num = b << s;
-        std::vector<uint32_t> &u = u_num.limbs;
-        const std::vector<uint32_t> &v = v_num.limbs;
+        const size_t m = u_num.limbs.size(), n = v_num.limbs.size();  // initial sizes
+        const unsigned s = std::countl_zero(v_num.limbs.back());  // normalization (make first bit of divisor set to 1)
+        u_num <<= s;
+        v_num <<= s;
+        std::vector<uint32_t>& u = u_num.limbs;
+        if (u.size() == m) {
+            u.push_back(0);
+        }
+        const std::vector<uint32_t>& v = v_num.limbs;
 
-        LongNum res;
-        res.exp = 0;
         res.limbs.resize(m - n + 1);
-        std::vector<uint32_t> &q = res.limbs;
-
+        std::vector<uint32_t>& q = res.limbs;
         for (size_t j = m - n; j != (size_t)-1; j--) {
             uint64_t qhat = (((uint64_t)u[j + n] << LongNum::base) | u[j + n - 1]) / v[n - 1];
             uint64_t rhat = (((uint64_t)u[j + n] << LongNum::base) | u[j + n - 1]) - qhat * v[n - 1];
-            again:  // FIXME: rewrite using a loop
-            if (qhat >= (1ull << LongNum::base) || qhat * v[n - 2] > ((rhat << LongNum::base) | v[j + n - 2])) {
-                qhat--;
-                rhat += v[n - 1];
-                if (rhat < (1ull << LongNum::base)) {
-                    goto again;
+            for (size_t i = 0; i < 2; i++) {
+                if (qhat >= (1ull << LongNum::base) || qhat * v[n - 2] > ((rhat << LongNum::base) | u[j + n - 2])) {
+                    qhat--;
+                    rhat += v[n - 1];
+                    if (rhat >= (1ull << LongNum::base)) {
+                        break;
+                    }
+                } else {
+                    break;
                 }
             }
             int64_t t;
-            uint32_t carry = 0;
+            uint64_t carry = 0;
             for (size_t i = 0; i < n; i++) {
                 const uint64_t prod = qhat * v[i];
-                t = (int64_t)(u[i + j] - carry - (prod & ((1ull << LongNum::base) - 1)));
+                t = (int64_t)(u[i + j] - carry - (prod & UINT32_MAX));
                 u[i + j] = t;
                 carry = (prod >> LongNum::base) - (t >> LongNum::base);
             }
-            t = u[j + n] - carry;
+            t = (int64_t)(u[j + n] - carry);
             u[j + n] = t;
 
             q[j] = qhat;
@@ -333,14 +338,14 @@ LongNum operator/(LongNum lhs, const LongNum &rhs) {
                 q[j]--;
                 carry = 0;
                 for (size_t i = 0; i < n; i++) {
-                    t = (int64_t)u[i + j] + v[i] + carry;
+                    t = (int64_t)(u[i + j] + v[i] + carry);
                     u[i + j] = t;
                     carry = t >> LongNum::base;
                 }
                 u[j + n] += carry;
             }
         }
-        return res;
+        return u_num != 0;
     };
 
     if (rhs == 0) {
@@ -359,13 +364,18 @@ LongNum operator/(LongNum lhs, const LongNum &rhs) {
         return 0;
     }
     LongNum res;
+    bool has_remainder;
     if (rhs.limbs.size() == 1) {
-        res = div_one_digit(lhs, rhs);
+        has_remainder = div_one_digit(lhs, rhs, res);
     } else {
-        res = long_div(lhs, rhs);
+        has_remainder = long_div(lhs, rhs, res);
     }
-    lhs.exp = std::max(lhs.exp, rhs.exp);
+    res.exp = std::max(lhs.exp, rhs.exp);
     res.is_negative = lhs.is_negative ^ rhs.is_negative;
+    if (lhs.is_negative && !rhs.is_negative && has_remainder) {  // Python-like behavior (-1 / 2 = -1)
+        res -= 1;
+    }
+    res.remove_leading_zeros();
     return res;
 }
 

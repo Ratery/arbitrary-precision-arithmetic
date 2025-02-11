@@ -16,7 +16,7 @@ LongNum::LongNum(unsigned long long x) {
         return;
     }
     while (x) {
-        limbs.push_back(x & ((1ull << base) - 1));
+        limbs.push_back(x & UINT32_MAX);
         x >>= base;
     }
 }
@@ -28,7 +28,7 @@ LongNum::LongNum(long long x) {
     is_negative = x < 0;
     x = std::abs(x);
     while (x) {
-        limbs.push_back(x & ((1ull << base) - 1));
+        limbs.push_back(x & UINT32_MAX);
         x >>= base;
     }
 }
@@ -226,7 +226,7 @@ LongNum& LongNum::operator-=(const LongNum &rhs) {
             carry = new_carry;
         } else {
             limbs[i] -= carry;
-            carry = (limbs[i] == (UINT32_MAX);
+            carry = (limbs[i] == UINT32_MAX);
         }
     }
     remove_leading_zeros();

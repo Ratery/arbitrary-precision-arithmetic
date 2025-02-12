@@ -110,20 +110,19 @@ LongNum operator<<(const LongNum &number, const unsigned shift) {
     if (!shift || number == 0) {
         return number;
     }
-    LongNum res;
-    res.exp = number.exp;
     const unsigned zeros_cnt = (shift + LongNum::base - 1) / LongNum::base;
-    res.limbs.resize(number.limbs.size() + zeros_cnt, 0);
     const unsigned r = shift % LongNum::base;
-    for (size_t i = zeros_cnt; i < res.limbs.size(); i++) {
-        res.limbs[i] = number.limbs[i - zeros_cnt];
+    std::vector<uint32_t> limbs(number.limbs.size() + zeros_cnt, 0);
+    for (size_t i = zeros_cnt; i < limbs.size(); i++) {
+        limbs[i] = number.limbs[i - zeros_cnt];
     }
     if (r) {
-        for (size_t i = zeros_cnt - 1; i < res.limbs.size() - 1; i++) {
-            res.limbs[i] = (res.limbs[i] >> (LongNum::base - r)) | (res.limbs[i + 1] << r);
+        for (size_t i = zeros_cnt - 1; i < limbs.size() - 1; i++) {
+            limbs[i] = (limbs[i] >> (LongNum::base - r)) | (limbs[i + 1] << r);
         }
-        res.limbs.back() >>= LongNum::base - r;
+        limbs.back() >>= LongNum::base - r;
     }
+    LongNum res(number.is_negative, number.exp, limbs);
     res.remove_leading_zeros();
     return res;
 }
@@ -141,19 +140,18 @@ LongNum operator>>(const LongNum &number, const unsigned shift) {
     if (to_erase >= number.limbs.size()) {
         return 0;
     }
-    LongNum res;
-    res.exp = number.exp;
-    res.limbs.resize(number.limbs.size() - to_erase);
+    std::vector<uint32_t> limbs(number.limbs.size() - to_erase);
     const unsigned r = shift % LongNum::base;
-    for (size_t i = 0; i < res.limbs.size(); i++) {
-        res.limbs[i] = number.limbs[i + to_erase];
+    for (size_t i = 0; i < limbs.size(); i++) {
+        limbs[i] = number.limbs[i + to_erase];
     }
     if (r) {
-        for (size_t i = 0; i < res.limbs.size() - 1; i++) {
-            res.limbs[i] = (res.limbs[i] >> r) | (res.limbs[i + 1] << (LongNum::base - r));
+        for (size_t i = 0; i < limbs.size() - 1; i++) {
+            limbs[i] = (limbs[i] >> r) | (limbs[i + 1] << (LongNum::base - r));
         }
-        res.limbs.back() >>= r;
+        limbs.back() >>= r;
     }
+    LongNum res(number.is_negative, number.exp, limbs);
     res.remove_leading_zeros();
     return res;
 }

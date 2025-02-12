@@ -53,8 +53,10 @@ public:
 
     LongNum truncate() const;
     LongNum frac() const;
-    LongNum pow(unsigned power) const;
     void shrink_to_fit();
+
+    LongNum pow(unsigned power) const;
+    LongNum sqrt() const;
 
     std::string to_binary_string() const;
     static LongNum from_binary_string(std::string str);

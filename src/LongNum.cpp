@@ -278,18 +278,16 @@ LongNum& LongNum::operator/=(const LongNum &rhs) {
 }
 
 LongNum operator/(LongNum lhs, const LongNum &rhs) {
-    auto div_one_digit = [](LongNum a, const LongNum &b, LongNum& res) {
+    auto div_one_digit = [](const LongNum& a, const LongNum &b, LongNum& res) {
         // divide a / b as integers (ignoring exp and sign), len(b) = 1
 
-        const uint32_t remainder = a.limbs.front() % b.limbs.front();
-        unsigned carry = 0;
-        for (size_t i = a.limbs.size() - 1; i != (size_t)-1; i--) {
-            const uint64_t cur = a.limbs[i] + ((uint64_t)carry << LongNum::base);
-            a.limbs[i] = cur / b.limbs.front();
-            carry = cur - a.limbs[i] * b.limbs.front();
-        }
         res = a;
-        return remainder != 0;
+        unsigned carry = 0;
+        for (size_t i = res.limbs.size() - 1; i != (size_t)-1; i--) {
+            const uint64_t cur = res.limbs[i] + ((uint64_t)carry << LongNum::base);
+            res.limbs[i] = cur / b.limbs.front();
+            carry = cur - res.limbs[i] * b.limbs.front();
+        }
     };
 
     auto long_div = [](LongNum u_num, LongNum v_num, LongNum& res) {
@@ -345,7 +343,6 @@ LongNum operator/(LongNum lhs, const LongNum &rhs) {
                 u[j + n] += carry;
             }
         }
-        return u_num != 0;
     };
 
     if (rhs == 0) {
@@ -364,17 +361,13 @@ LongNum operator/(LongNum lhs, const LongNum &rhs) {
         return 0;
     }
     LongNum res;
-    bool has_remainder;
     if (rhs.limbs.size() == 1) {
-        has_remainder = div_one_digit(lhs, rhs, res);
+        div_one_digit(lhs, rhs, res);
     } else {
-        has_remainder = long_div(lhs, rhs, res);
+        long_div(lhs, rhs, res);
     }
     res.exp = std::max(lhs.exp, rhs.exp);
     res.is_negative = lhs.is_negative ^ rhs.is_negative;
-    if (lhs.is_negative && !rhs.is_negative && has_remainder) {  // Python-like behavior (-1 / 2 = -1)
-        res -= 1;
-    }
     res.remove_leading_zeros();
     return res;
 }

@@ -37,7 +37,7 @@ public:
     friend LongNum operator>>(const LongNum& number, unsigned shift);
 
     LongNum& operator+=(const LongNum& rhs);
-    friend LongNum operator+(const LongNum& lhs, const LongNum& rhs);
+    friend LongNum operator+(LongNum lhs, const LongNum& rhs);
 
     LongNum& operator-=(const LongNum& rhs);
     friend LongNum operator-(LongNum lhs, const LongNum& rhs);

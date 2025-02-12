@@ -61,7 +61,7 @@ public:
     std::string to_binary_string() const;
     static LongNum from_binary_string(std::string str);
 
-    std::string to_string() const;
+    std::string to_string(unsigned decimal_precision = UINT_MAX) const;
     static LongNum from_string(std::string str);
 };
 

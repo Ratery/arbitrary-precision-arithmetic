@@ -1,6 +1,7 @@
 #include "LongNum.hpp"
 
 #include <iostream>
+#include <limits>
 #include <vector>
 #include <cinttypes>
 #include <algorithm>
@@ -490,7 +491,7 @@ LongNum LongNum::from_binary_string(std::string str) {
     return res;
 }
 
-std::string LongNum::to_string() const {
+std::string LongNum::to_string(unsigned decimal_precision) const {
     const LongNum base = 10;  // TODO: make it work with any base
     std::string res;
     LongNum whole = this->truncate();
@@ -511,12 +512,16 @@ std::string LongNum::to_string() const {
         res += '-';
     }
     std::ranges::reverse(res);
+    if (decimal_precision == 0) {
+        return res;
+    }
     LongNum frac = this->frac();
     if (frac == 0) {
         return res;
     }
     res += '.';
-    while (frac != 0) {
+    unsigned cnt = 0;
+    while (frac != 0 && cnt++ < decimal_precision) {
         frac *= base;
         LongNum r = frac.truncate();
         frac -= r;

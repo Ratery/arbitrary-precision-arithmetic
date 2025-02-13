@@ -482,11 +482,9 @@ LongNum LongNum::from_binary_string(std::string str) {
             throw std::invalid_argument("Invalid string");
         }
     }
-    for (size_t i = str.size() - 1; i != (size_t)-1; i -= base) {
+    for (int i = (int)str.size() - 1; i >= 0; i -= base) {
         res.limbs.push_back(0);
-        for (unsigned j = 0; j < base; j++) {
-            if (i < j)
-                break;
+        for (unsigned j = 0; j < std::min(base, (unsigned)i + 1); j++) {
             if (str[i - j] == '1') {
                 res.limbs.back() |= (1 << j);
             }

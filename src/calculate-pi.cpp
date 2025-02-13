@@ -22,7 +22,7 @@ LongNum calculate_pi(const unsigned precision) {
     return pi;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Specify calculation precision by providing a command line argument\n";
         return 1;
@@ -37,9 +37,9 @@ int main(int argc, char **argv) {
         const LongNum pi = calculate_pi(std::max(380u, (unsigned)precision * 69 / 20 + 1));
         std::cout << pi.to_string(precision) << '\n';
         return 0;
-    } catch (std::invalid_argument const &ex) {
+    } catch (const std::invalid_argument& ex) {
         std::cerr << "Invalid precision: " << arg << '\n';
-    } catch (std::out_of_range const &ex) {
+    } catch (const std::out_of_range& ex) {
         std::cerr << "Precision out of range: " << arg << '\n';
     }
 }

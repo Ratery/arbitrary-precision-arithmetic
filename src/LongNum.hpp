@@ -70,6 +70,6 @@ LongNum operator ""_longnum(unsigned long long number);
 LongNum operator ""_longnum(long double number);
 
 std::istream& operator>>(std::istream& stream, LongNum& number);
-std::ostream& operator<<(std::ostream& stream, const LongNum &number);
+std::ostream& operator<<(std::ostream& stream, const LongNum& number);
 
 #endif

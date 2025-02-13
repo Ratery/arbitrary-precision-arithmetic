@@ -6,7 +6,7 @@
 #include <cinttypes>
 #include <algorithm>
 
-LongNum::LongNum(const bool _is_negative, const unsigned _exp, std::vector<uint32_t> &_limbs)
+LongNum::LongNum(const bool _is_negative, const unsigned _exp, std::vector<uint32_t>& _limbs)
     : is_negative(_is_negative),
       exp(_exp),
       limbs(std::move(_limbs)) {
@@ -41,7 +41,7 @@ LongNum& LongNum::operator=(LongNum other) {
     return *this;
 }
 
-bool operator==(const LongNum &lhs, const LongNum &rhs) {
+bool operator==(const LongNum& lhs, const LongNum& rhs) {
     if (lhs.limbs.empty() && rhs.limbs.empty()) {
         return true;
     }
@@ -57,7 +57,7 @@ bool operator==(const LongNum &lhs, const LongNum &rhs) {
     return lhs.limbs == rhs.limbs;
 }
 
-std::strong_ordering operator<=>(const LongNum &lhs, const LongNum &rhs) {
+std::strong_ordering operator<=>(const LongNum& lhs, const LongNum& rhs) {
     if (lhs.limbs.empty() && rhs.limbs.empty()) {
         return std::strong_ordering::equal;
     }
@@ -107,7 +107,7 @@ LongNum& LongNum::operator<<=(const unsigned shift) {
     return *this;
 }
 
-LongNum operator<<(const LongNum &number, const unsigned shift) {
+LongNum operator<<(const LongNum& number, const unsigned shift) {
     if (!shift || number == 0) {
         return number;
     }
@@ -133,7 +133,7 @@ LongNum& LongNum::operator>>=(const unsigned shift) {
     return *this;
 }
 
-LongNum operator>>(const LongNum &number, const unsigned shift) {
+LongNum operator>>(const LongNum& number, const unsigned shift) {
     if (!shift || number == 0) {
         return number;
     }
@@ -157,7 +157,7 @@ LongNum operator>>(const LongNum &number, const unsigned shift) {
     return res;
 }
 
-LongNum& LongNum::operator+=(const LongNum &rhs) {
+LongNum& LongNum::operator+=(const LongNum& rhs) {
     if (*this == 0) {
         *this = rhs;
         return *this;
@@ -190,12 +190,12 @@ LongNum& LongNum::operator+=(const LongNum &rhs) {
     return *this;
 }
 
-LongNum operator+(LongNum lhs, const LongNum &rhs) {
+LongNum operator+(LongNum lhs, const LongNum& rhs) {
     lhs += rhs;
     return lhs;
 }
 
-LongNum& LongNum::operator-=(const LongNum &rhs) {
+LongNum& LongNum::operator-=(const LongNum& rhs) {
     if (rhs == 0) {
         return *this;
     }
@@ -232,17 +232,17 @@ LongNum& LongNum::operator-=(const LongNum &rhs) {
     return *this;
 }
 
-LongNum operator-(LongNum lhs, const LongNum &rhs) {
+LongNum operator-(LongNum lhs, const LongNum& rhs) {
     lhs -= rhs;
     return lhs;
 }
 
-LongNum& LongNum::operator*=(const LongNum &rhs) {
+LongNum& LongNum::operator*=(const LongNum& rhs) {
     *this = *this * rhs;
     return *this;
 }
 
-LongNum operator*(const LongNum &lhs, const LongNum &rhs) {
+LongNum operator*(const LongNum& lhs, const LongNum& rhs) {
     if (lhs == 0 || rhs == 0) {
         return 0;
     }
@@ -271,13 +271,13 @@ LongNum operator*(const LongNum &lhs, const LongNum &rhs) {
     return res;
 }
 
-LongNum& LongNum::operator/=(const LongNum &rhs) {
+LongNum& LongNum::operator/=(const LongNum& rhs) {
     *this = *this / rhs;
     return *this;
 }
 
-LongNum operator/(LongNum lhs, const LongNum &rhs) {
-    auto div_one_digit = [](const LongNum& a, const LongNum &b, LongNum& res) {
+LongNum operator/(LongNum lhs, const LongNum& rhs) {
+    auto div_one_digit = [](const LongNum& a, const LongNum& b, LongNum& res) {
         // divide a / b as integers (ignoring exp and sign), len(b) = 1
 
         res = a;

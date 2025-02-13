@@ -440,21 +440,25 @@ LongNum LongNum::sqrt() const {
 }
 
 std::string LongNum::to_binary_string() const {
+	if (*this == 0) {
+        return "0";
+    }
     std::string res;
     if (is_negative) {
         res = "-";
     }
-    for (size_t i = limbs.size() - 1; i != (size_t)-1; i--) {
-        for (unsigned j = base; j != (unsigned)-1; j--) {
-            if ((limbs[i] >> j) & 1)
-                res += '1';
-            else
-                res += '0';
+    for (uint32_t limb : limbs) {
+        for (unsigned j = 0; j < base; j++) {
+            res += std::to_string((limb >> j) & 1);
         }
     }
-    if (exp > 0) {
-        res.insert(res.end() - exp, '.');
+    while (res.back() == '0' && res.length() > exp + 1) {
+        res.pop_back();
     }
+    if (exp > 0) {
+        res.insert(res.begin() + exp, '.');
+    }
+    std::ranges::reverse(res);
     return res;
 }
 

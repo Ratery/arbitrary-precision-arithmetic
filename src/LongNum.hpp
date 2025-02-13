@@ -2,6 +2,7 @@
 #define LONGNUM_HPP
 
 #include <iostream>
+#include <climits>
 #include <vector>
 
 class LongNum {

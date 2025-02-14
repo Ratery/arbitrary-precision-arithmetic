@@ -526,15 +526,15 @@ std::string LongNum::to_string(unsigned decimal_precision) const {
     return res;
 }
 
-LongNum LongNum::from_string(std::string str) {
+LongNum LongNum::from_string(std::string str, const std::optional<unsigned>& precision) {
     const LongNum base = 10;  // TODO: make it work with any base
     if (str.empty()) {
         throw std::invalid_argument("Invalid string");
     }
-    bool negative = false;
+    LongNum res = 0;
     if (str.front() == '-') {
         str.erase(str.begin());
-        negative = true;
+        res.is_negative = true;
     }
     if (str.front() == '+') {
         str.erase(str.begin());
@@ -555,14 +555,12 @@ LongNum LongNum::from_string(std::string str) {
             throw std::invalid_argument("Invalid string");
         }
     }
-    LongNum res;
     for (const auto digit: str) {
         res *= base;
         res += digit - '0';
     }
-    res.set_precision(decimal_exp * 4);
+    res.set_precision(precision.value_or(decimal_exp * 4));
     res /= base.pow(decimal_exp);
-    res.is_negative = negative;
     return res;
 }
 

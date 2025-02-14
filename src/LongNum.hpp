@@ -6,6 +6,7 @@
 #include <string>
 #include <cinttypes>
 #include <climits>
+#include <optional>
 
 class LongNum {
     bool is_negative = false;
@@ -65,7 +66,7 @@ public:
     static LongNum from_binary_string(std::string str);
 
     std::string to_string(unsigned decimal_precision = UINT_MAX) const;
-    static LongNum from_string(std::string str);
+    static LongNum from_string(std::string str, const std::optional<unsigned>& precision = std::nullopt);
 };
 
 LongNum operator""_longnum(unsigned long long number);

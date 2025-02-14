@@ -2,8 +2,10 @@
 #define LONGNUM_HPP
 
 #include <iostream>
-#include <climits>
 #include <vector>
+#include <string>
+#include <cinttypes>
+#include <climits>
 
 class LongNum {
     bool is_negative = false;

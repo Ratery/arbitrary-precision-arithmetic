@@ -1,5 +1,6 @@
-#include <iostream>
 #include "LongNum.hpp"
+#include <iostream>
+#include <stdexcept>
 
 LongNum calculate_pi(const unsigned precision) {
     // source: https://www.craig-wood.com/nick/articles/pi-chudnovsky/
@@ -16,8 +17,7 @@ LongNum calculate_pi(const unsigned precision) {
         b_sum += k * a_k;
         k += 1;
     }
-    LongNum a = a_sum * 13591409, b = b_sum * 545140134;
-    LongNum total = a_sum * 13591409 + b_sum * 545140134_longnum;
+    LongNum total = a_sum * 13591409 + b_sum * 545140134;
     LongNum pi = (426880 * (10005_longnum).with_precision(precision).sqrt()) / total;
     return pi;
 }

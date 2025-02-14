@@ -1,10 +1,7 @@
 #include "LongNum.hpp"
-
-#include <iostream>
-#include <limits>
-#include <vector>
-#include <cinttypes>
 #include <algorithm>
+#include <utility>
+#include <stdexcept>
 
 LongNum::LongNum(const bool _is_negative, const unsigned _exp, std::vector<uint32_t>& _limbs)
     : is_negative(_is_negative),

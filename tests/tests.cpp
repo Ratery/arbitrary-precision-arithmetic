@@ -1,6 +1,7 @@
 #include "tester.hpp"
 #include "../src/LongNum.hpp"
 #include <iostream>
+#include <stdexcept>
 
 template<typename T>
 std::function<bool()> is_equal(const T& lhs, const T& rhs) {

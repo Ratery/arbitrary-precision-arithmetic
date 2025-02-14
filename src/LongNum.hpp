@@ -25,7 +25,7 @@ public:
 
     ~LongNum() = default;
 
-    LongNum& operator=(LongNum other);
+    LongNum& operator=(const LongNum& other) = default;
 
     friend bool operator==(const LongNum& lhs, const LongNum& rhs);
     friend std::strong_ordering operator<=>(const LongNum& lhs, const LongNum& rhs);

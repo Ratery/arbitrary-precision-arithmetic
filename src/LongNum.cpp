@@ -31,13 +31,6 @@ LongNum::LongNum(long long x) {
     }
 }
 
-LongNum& LongNum::operator=(LongNum other) {
-    std::swap(is_negative, other.is_negative);
-    std::swap(exp, other.exp);
-    std::swap(limbs, other.limbs);
-    return *this;
-}
-
 bool operator==(const LongNum& lhs, const LongNum& rhs) {
     if (lhs.limbs.empty() && rhs.limbs.empty()) {
         return true;

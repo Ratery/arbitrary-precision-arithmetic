@@ -576,13 +576,17 @@ LongNum LongNum::from_string(std::string str) {
     return res;
 }
 
-LongNum operator ""_longnum(const long double number) {
+LongNum operator""_longnum(const long double number) {
     return LongNum::from_string(std::to_string(number));
 }
 
-LongNum operator ""_longnum(const unsigned long long number) {
+LongNum operator""_longnum(const unsigned long long number) {
     return LongNum(number);
 }
+
+LongNum operator""_longnum(const char* number, std::size_t len) {
+    return LongNum::from_string(std::string(number, len));
+};
 
 std::istream& operator>>(std::istream& stream, LongNum& number) {
     std::string str;

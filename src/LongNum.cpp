@@ -3,6 +3,8 @@
 #include <utility>
 #include <stdexcept>
 
+constexpr unsigned DEFAULT_PRECISION = 64;
+
 LongNum::LongNum(const bool _is_negative, const unsigned _exp, std::vector<uint32_t>& _limbs)
     : is_negative(_is_negative),
       exp(_exp),
@@ -480,6 +482,9 @@ LongNum LongNum::from_binary_string(std::string str) {
             }
         }
     }
+    if (res.exp < DEFAULT_PRECISION) {
+        res.set_precision(DEFAULT_PRECISION);
+    }
     return res;
 }
 
@@ -559,7 +564,11 @@ LongNum LongNum::from_string(std::string str, const std::optional<unsigned>& pre
         res *= base;
         res += digit - '0';
     }
-    res.set_precision(precision.value_or(decimal_exp * 4));
+    if (decimal_exp == 0) {
+        res.set_precision(precision.value_or(0));
+    } else {
+        res.set_precision(precision.value_or(std::max(decimal_exp * 4, DEFAULT_PRECISION)));
+    }
     res /= base.pow(decimal_exp);
     return res;
 }

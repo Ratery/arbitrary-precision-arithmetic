@@ -197,8 +197,8 @@ int main() {
     success &= test_multiplication();
     success &= test_division();
     if (!success) {
-        throw std::logic_error("Any tests failed");
+        throw std::logic_error("\033[1;31mANY TESTS FAILED\033[0m");
     }
-    std::cout << "All tests passed" << std::endl;
+    std::cout << "\033[1;32mALL TESTS PASSED\033[0m" << std::endl;
     return 0;
 }

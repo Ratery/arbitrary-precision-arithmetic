@@ -1,5 +1,5 @@
 #include "tester.hpp"
-#include <print>
+#include <ostream>
 #include <utility>
 
 Tester::Tester(std::string name) : group_name(std::move(name)) {}
@@ -17,10 +17,19 @@ bool Tester::run_tests() {
     for (size_t i = 0; i < tests.size(); i++) {
         const bool passed = tests[i].function();
         passed_cnt += passed;
-        std::println("{}) {}: {}", i + 1, tests[i].description, (passed ? "[PASSED]" : "[FAILED]"));
+        std::println(
+            "{}) {}: {}", i + 1,
+            tests[i].description,
+            (passed ? "\033[1;32m[PASSED]\033[0m" : "\033[1;31m[FAILED]\033[0m")
+        );
     }
+
     float percentage = (float)passed_cnt / (float)tests_cnt * 100;
-    std::println("Group results: {}/{} | {:.2f}%\n", passed_cnt, tests_cnt, percentage);
+    const bool success = (passed_cnt == tests_cnt);
+    std::println(
+        "\033[1;{}mGroup results: {}/{} | {:.2f}%\033[0m\n",
+        (success ? 32 : 31), passed_cnt, tests_cnt, percentage
+    );
     std::fflush(stdout);
-    return passed_cnt == tests_cnt;
+    return success;
 }

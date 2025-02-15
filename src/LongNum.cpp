@@ -132,7 +132,7 @@ LongNum operator>>(const LongNum& number, const unsigned shift) {
     }
     const unsigned to_erase = shift / BASE;
     if (to_erase >= number.limbs.size()) {
-        return 0;
+        return (0_longnum).with_precision(number.exp);
     }
     std::vector<uint32_t> limbs(number.limbs.size() - to_erase);
     const unsigned r = shift % BASE;
@@ -152,10 +152,11 @@ LongNum operator>>(const LongNum& number, const unsigned shift) {
 
 LongNum& LongNum::operator+=(const LongNum& rhs) {
     if (*this == 0) {
-        *this = rhs;
+        *this = rhs.with_precision(std::max(exp, rhs.exp));
         return *this;
     }
     if (rhs == 0) {
+        set_precision(std::max(exp, rhs.exp));
         return *this;
     }
     if (is_negative != rhs.is_negative) {
@@ -190,10 +191,11 @@ LongNum operator+(LongNum lhs, const LongNum& rhs) {
 
 LongNum& LongNum::operator-=(const LongNum& rhs) {
     if (rhs == 0) {
+        set_precision(std::max(exp, rhs.exp));
         return *this;
     }
     if (*this == rhs) {
-        *this = 0;
+        *this = (0_longnum).with_precision(std::max(exp, rhs.exp));
         return *this;
     }
     if (is_negative != rhs.is_negative) {
@@ -237,7 +239,7 @@ LongNum& LongNum::operator*=(const LongNum& rhs) {
 
 LongNum operator*(const LongNum& lhs, const LongNum& rhs) {
     if (lhs == 0 || rhs == 0) {
-        return 0;
+        return (0_longnum).with_precision(std::max(lhs.exp, rhs.exp));
     }
     LongNum res;
     res.exp = lhs.exp + rhs.exp;
@@ -341,7 +343,7 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
         throw std::invalid_argument("Division by zero");
     }
     if (lhs == 0) {
-        return 0;
+        return (0_longnum).with_precision(std::max(lhs.exp, rhs.exp));
     }
     if (lhs.exp < rhs.exp) {
         lhs <<= 2 * rhs.exp - lhs.exp;
@@ -350,7 +352,7 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
     }
     if (lhs.limbs.size() < rhs.limbs.size() ||
         (lhs.limbs.size() == rhs.limbs.size() && lhs.limbs.back() < rhs.limbs.back())) {
-        return 0;
+        return (0_longnum).with_precision(std::max(lhs.exp, rhs.exp));
     }
     LongNum res;
     if (rhs.limbs.size() == 1) {

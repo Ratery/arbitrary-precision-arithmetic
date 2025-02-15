@@ -3,6 +3,7 @@
 #include <utility>
 #include <stdexcept>
 
+constexpr unsigned BASE = 32;
 constexpr unsigned DEFAULT_PRECISION = 64;
 
 LongNum::LongNum(const bool _is_negative, const unsigned _exp, std::vector<uint32_t>& _limbs)
@@ -17,7 +18,7 @@ LongNum::LongNum(unsigned long long x) {
     }
     while (x) {
         limbs.push_back(x & UINT32_MAX);
-        x >>= base;
+        x >>= BASE;
     }
 }
 
@@ -29,7 +30,7 @@ LongNum::LongNum(long long x) {
     x = std::abs(x);
     while (x) {
         limbs.push_back(x & UINT32_MAX);
-        x >>= base;
+        x >>= BASE;
     }
 }
 
@@ -103,17 +104,17 @@ LongNum operator<<(const LongNum& number, const unsigned shift) {
     if (!shift || number == 0) {
         return number;
     }
-    const unsigned zeros_cnt = (shift + LongNum::base - 1) / LongNum::base;
-    const unsigned r = shift % LongNum::base;
+    const unsigned zeros_cnt = (shift + BASE - 1) / BASE;
+    const unsigned r = shift % BASE;
     std::vector<uint32_t> limbs(number.limbs.size() + zeros_cnt, 0);
     for (size_t i = zeros_cnt; i < limbs.size(); i++) {
         limbs[i] = number.limbs[i - zeros_cnt];
     }
     if (r) {
         for (size_t i = zeros_cnt - 1; i < limbs.size() - 1; i++) {
-            limbs[i] = (limbs[i] >> (LongNum::base - r)) | (limbs[i + 1] << r);
+            limbs[i] = (limbs[i] >> (BASE - r)) | (limbs[i + 1] << r);
         }
-        limbs.back() >>= LongNum::base - r;
+        limbs.back() >>= BASE - r;
     }
     LongNum res(number.is_negative, number.exp, limbs);
     res.remove_leading_zeros();
@@ -129,18 +130,18 @@ LongNum operator>>(const LongNum& number, const unsigned shift) {
     if (!shift || number == 0) {
         return number;
     }
-    const unsigned to_erase = shift / LongNum::base;
+    const unsigned to_erase = shift / BASE;
     if (to_erase >= number.limbs.size()) {
         return 0;
     }
     std::vector<uint32_t> limbs(number.limbs.size() - to_erase);
-    const unsigned r = shift % LongNum::base;
+    const unsigned r = shift % BASE;
     for (size_t i = 0; i < limbs.size(); i++) {
         limbs[i] = number.limbs[i + to_erase];
     }
     if (r) {
         for (size_t i = 0; i < limbs.size() - 1; i++) {
-            limbs[i] = (limbs[i] >> r) | (limbs[i + 1] << (LongNum::base - r));
+            limbs[i] = (limbs[i] >> r) | (limbs[i + 1] << (BASE - r));
         }
         limbs.back() >>= r;
     }
@@ -250,7 +251,7 @@ LongNum operator*(const LongNum& lhs, const LongNum& rhs) {
                 carry = res.limbs[i + j] < carry;
                 res.limbs[i + j] += prod;
                 carry += res.limbs[i + j] < (uint32_t) prod;
-                carry += prod >> LongNum::base;
+                carry += prod >> BASE;
             } else {
                 res.limbs[i + j] += carry;
                 carry = 0;
@@ -275,7 +276,7 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
         res = a;
         unsigned carry = 0;
         for (size_t i = res.limbs.size() - 1; i != (size_t)-1; i--) {
-            const uint64_t cur = res.limbs[i] + ((uint64_t)carry << LongNum::base);
+            const uint64_t cur = res.limbs[i] + ((uint64_t)carry << BASE);
             res.limbs[i] = cur / b.limbs.front();
             carry = cur - res.limbs[i] * b.limbs.front();
         }
@@ -298,13 +299,13 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
         res.limbs.resize(m - n + 1);
         std::vector<uint32_t>& q = res.limbs;
         for (size_t j = m - n; j != (size_t)-1; j--) {
-            uint64_t qhat = (((uint64_t)u[j + n] << LongNum::base) | u[j + n - 1]) / v[n - 1];
-            uint64_t rhat = (((uint64_t)u[j + n] << LongNum::base) | u[j + n - 1]) - qhat * v[n - 1];
+            uint64_t qhat = (((uint64_t)u[j + n] << BASE) | u[j + n - 1]) / v[n - 1];
+            uint64_t rhat = (((uint64_t)u[j + n] << BASE) | u[j + n - 1]) - qhat * v[n - 1];
             for (size_t i = 0; i < 2; i++) {
-                if (qhat >= (1ull << LongNum::base) || qhat * v[n - 2] > ((rhat << LongNum::base) | u[j + n - 2])) {
+                if (qhat >= (1ull << BASE) || qhat * v[n - 2] > ((rhat << BASE) | u[j + n - 2])) {
                     qhat--;
                     rhat += v[n - 1];
-                    if (rhat >= (1ull << LongNum::base)) {
+                    if (rhat >= (1ull << BASE)) {
                         break;
                     }
                 } else {
@@ -317,7 +318,7 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
                 const uint64_t prod = qhat * v[i];
                 t = (int64_t)(u[i + j] - carry - (prod & UINT32_MAX));
                 u[i + j] = t;
-                carry = (prod >> LongNum::base) - (t >> LongNum::base);
+                carry = (prod >> BASE) - (t >> BASE);
             }
             t = (int64_t)(u[j + n] - carry);
             u[j + n] = t;
@@ -329,7 +330,7 @@ LongNum operator/(LongNum lhs, const LongNum& rhs) {
                 for (size_t i = 0; i < n; i++) {
                     t = (int64_t)(u[i + j] + v[i] + carry);
                     u[i + j] = t;
-                    carry = t >> LongNum::base;
+                    carry = t >> BASE;
                 }
                 u[j + n] += carry;
             }
@@ -440,7 +441,7 @@ std::string LongNum::to_binary_string() const {
         res = "-";
     }
     for (uint32_t limb : limbs) {
-        for (unsigned j = 0; j < base; j++) {
+        for (unsigned j = 0; j < BASE; j++) {
             res += std::to_string((limb >> j) & 1);
         }
     }
@@ -474,9 +475,9 @@ LongNum LongNum::from_binary_string(std::string str) {
             throw std::invalid_argument("Invalid string");
         }
     }
-    for (int i = (int)str.size() - 1; i >= 0; i -= base) {
+    for (int i = (int)str.size() - 1; i >= 0; i -= BASE) {
         res.limbs.push_back(0);
-        for (unsigned j = 0; j < std::min(base, (unsigned)i + 1); j++) {
+        for (unsigned j = 0; j < std::min(BASE, (unsigned)i + 1); j++) {
             if (str[i - j] == '1') {
                 res.limbs.back() |= (1 << j);
             }

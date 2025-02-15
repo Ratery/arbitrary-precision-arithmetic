@@ -10,7 +10,6 @@
 
 class LongNum {
     bool is_negative = false;
-    constexpr static unsigned base = 32;
     unsigned exp = 0;
     std::vector<uint32_t> limbs;
 

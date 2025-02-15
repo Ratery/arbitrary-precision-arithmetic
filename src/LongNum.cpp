@@ -180,12 +180,9 @@ LongNum& LongNum::operator+=(const LongNum& rhs) {
         if (i == limbs.size()) {
             limbs.push_back(0);
         }
-        limbs[i] += carry;  // TODO: optimize carry calculation here
-        carry = limbs[i] < carry;
-        if (i < rhs.limbs.size()) {
-            limbs[i] += rhs.limbs[i];
-            carry += limbs[i] < rhs.limbs[i];
-        }
+        const uint64_t sum = (uint64_t)limbs[i] + carry + (i < rhs.limbs.size() ? rhs.limbs[i] : 0);
+        limbs[i] = sum;
+        carry = sum >> BASE;
     }
     return *this;
 }
@@ -254,12 +251,9 @@ LongNum operator*(const LongNum& lhs, const LongNum& rhs) {
         uint32_t carry = 0;
         for (size_t j = 0; j < rhs.limbs.size() || carry; j++) {
             if (j < rhs.limbs.size()) {
-                const uint64_t prod = (uint64_t) lhs.limbs[i] * rhs.limbs[j];
-                res.limbs[i + j] += carry;
-                carry = res.limbs[i + j] < carry;
-                res.limbs[i + j] += prod;
-                carry += res.limbs[i + j] < (uint32_t) prod;
-                carry += prod >> BASE;
+                const uint64_t cur = (uint64_t)lhs.limbs[i] * rhs.limbs[j] + res.limbs[i + j] + carry;
+                res.limbs[i + j] = cur;
+                carry = cur >> BASE;
             } else {
                 res.limbs[i + j] += carry;
                 carry = 0;

@@ -35,8 +35,8 @@ LongNum::LongNum(long long x) {
 }
 
 bool operator==(const LongNum& lhs, const LongNum& rhs) {
-    if (lhs.limbs.empty() && rhs.limbs.empty()) {
-        return true;
+    if (lhs.limbs.empty() || rhs.limbs.empty()) {  // when lhs = 0 or rhs = 0
+        return lhs.limbs.empty() && rhs.limbs.empty();
     }
     if (lhs.is_negative != rhs.is_negative) {
         return false;
@@ -51,8 +51,14 @@ bool operator==(const LongNum& lhs, const LongNum& rhs) {
 }
 
 std::strong_ordering operator<=>(const LongNum& lhs, const LongNum& rhs) {
-    if (lhs.limbs.empty() && rhs.limbs.empty()) {
+    if (lhs.limbs.empty() && rhs.limbs.empty()) {  // lhs = rhs = 0
         return std::strong_ordering::equal;
+    }
+    if (lhs.limbs.empty()) {  // lhs = 0
+        return rhs.is_negative ? std::strong_ordering::greater : std::strong_ordering::less;
+    }
+    if (rhs.limbs.empty()) {  // rhs = 0
+        return lhs.is_negative ? std::strong_ordering::less : std::strong_ordering::greater;
     }
     if (lhs.is_negative && !rhs.is_negative) {
         return std::strong_ordering::less;

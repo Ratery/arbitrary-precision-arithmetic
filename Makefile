@@ -1,41 +1,51 @@
 CXX = g++-14
 
-CXXFLAGS =     \
-	-c         \
-	-std=c++23 \
-	-Wall      \
-	-Wextra    \
-	-Werror
+CXXFLAGS += -std=c++23 -pedantic -Wall -Wextra -Werror
+LDFLAGS ?=
 
-BUILD_PATH = build
-SRC_PATH = src
+BUILD_PATH ?= build
 
-pi: calculate-pi
-	$(BUILD_PATH)/calculate-pi 100
+RELEASE ?= 0
+ifeq ($(RELEASE), 0)
+	CXXFLAGS += -g
+else
+	CXXFLAGS += -O3 -flto -DNDEBUG
+endif
 
-test: tests
+COMPILE = $(CXX) $(CXXFLAGS)
+LINK = $(CXX) $(LDFLAGS)
+
+all: $(BUILD_PATH)/LongNum.o
+
+PRECISION ?= 100
+pi: $(BUILD_PATH)/calculate-pi
+	$(BUILD_PATH)/calculate-pi $(PRECISION)
+
+test: $(BUILD_PATH)/tests
 	$(BUILD_PATH)/tests
 
-calculate-pi: $(BUILD_PATH)/calculate-pi.o $(BUILD_PATH)/LongNum.o | $(BUILD_PATH)
-	$(CXX) $(BUILD_PATH)/calculate-pi.o $(BUILD_PATH)/LongNum.o -o $(BUILD_PATH)/calculate-pi
-
-tests: $(BUILD_PATH)/tests.o $(BUILD_PATH)/LongNum.o $(BUILD_PATH)/tester.o | $(BUILD_PATH)
-	$(CXX) $(BUILD_PATH)/tests.o $(BUILD_PATH)/LongNum.o $(BUILD_PATH)/tester.o -o $(BUILD_PATH)/tests
-
 $(BUILD_PATH):
-	mkdir -p $(BUILD_PATH)
+	@mkdir -p $(BUILD_PATH)
+
+$(BUILD_PATH)/calculate-pi: $(BUILD_PATH)/calculate-pi.o $(BUILD_PATH)/LongNum.o | $(BUILD_PATH)
+	$(LINK) $^ -o $@
 
 $(BUILD_PATH)/LongNum.o: src/LongNum.cpp src/LongNum.hpp | $(BUILD_PATH)
-	$(CXX) $(CXXFLAGS) src/LongNum.cpp -o $(BUILD_PATH)/LongNum.o
+	$(COMPILE) $< -c -o $@
 
-$(BUILD_PATH)/calculate-pi.o: $(SRC_PATH)/calculate-pi.cpp | $(BUILD_PATH)
-	$(CXX) $(CXXFLAGS) src/calculate-pi.cpp -o src/calculate-pi.o
+$(BUILD_PATH)/calculate-pi.o: src/calculate-pi.cpp src/LongNum.hpp | $(BUILD_PATH)
+	$(COMPILE) $< -c -o $@
+
+$(BUILD_PATH)/tests: $(BUILD_PATH)/tests.o $(BUILD_PATH)/tester.o $(BUILD_PATH)/LongNum.o | $(BUILD_PATH)
+	$(LINK) $^ -o $@
 
 $(BUILD_PATH)/tester.o: tests/tester.cpp tests/tester.hpp | $(BUILD_PATH)
-	$(CXX) $(CXXFLAGS) tests/tester.cpp -o $(BUILD_PATH)/tester.o
+	$(COMPILE) $< -c -o $@
 
-$(BUILD_PATH)/tests.o: tests/tests.cpp | $(BUILD_PATH)
-	$(CXX) $(CXXFLAGS) tests/tests.cpp -o $(BUILD_PATH)/tests.o
+$(BUILD_PATH)/tests.o: tests/tests.cpp tests/tester.hpp src/LongNum.hpp | $(BUILD_PATH)
+	$(COMPILE) $< -c -o $@
 
 clean:
 	rm -rf $(BUILD_PATH)
+
+.PHONY: all pi test clean

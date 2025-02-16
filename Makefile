@@ -15,7 +15,7 @@ endif
 COMPILE = $(CXX) $(CXXFLAGS)
 LINK = $(CXX) $(LDFLAGS)
 
-all: $(BUILD_PATH)/LongNum.o
+all: $(BUILD_PATH)/longnum.o
 
 PRECISION ?= 100
 pi: $(BUILD_PATH)/calculate-pi
@@ -27,22 +27,22 @@ test: $(BUILD_PATH)/tests
 $(BUILD_PATH):
 	@mkdir -p $(BUILD_PATH)
 
-$(BUILD_PATH)/calculate-pi: $(BUILD_PATH)/calculate-pi.o $(BUILD_PATH)/LongNum.o | $(BUILD_PATH)
+$(BUILD_PATH)/calculate-pi: $(BUILD_PATH)/calculate-pi.o $(BUILD_PATH)/longnum.o | $(BUILD_PATH)
 	$(LINK) $^ -o $@
 
-$(BUILD_PATH)/LongNum.o: src/LongNum.cpp src/LongNum.hpp | $(BUILD_PATH)
+$(BUILD_PATH)/longnum.o: src/longnum.cpp src/longnum.hpp | $(BUILD_PATH)
 	$(COMPILE) $< -c -o $@
 
-$(BUILD_PATH)/calculate-pi.o: src/calculate-pi.cpp src/LongNum.hpp | $(BUILD_PATH)
+$(BUILD_PATH)/calculate-pi.o: src/calculate-pi.cpp src/longnum.hpp | $(BUILD_PATH)
 	$(COMPILE) $< -c -o $@
 
-$(BUILD_PATH)/tests: $(BUILD_PATH)/tests.o $(BUILD_PATH)/tester.o $(BUILD_PATH)/LongNum.o | $(BUILD_PATH)
+$(BUILD_PATH)/tests: $(BUILD_PATH)/tests.o $(BUILD_PATH)/tester.o $(BUILD_PATH)/longnum.o | $(BUILD_PATH)
 	$(LINK) $^ -o $@
 
 $(BUILD_PATH)/tester.o: tests/tester.cpp tests/tester.hpp | $(BUILD_PATH)
 	$(COMPILE) $< -c -o $@
 
-$(BUILD_PATH)/tests.o: tests/tests.cpp tests/tester.hpp src/LongNum.hpp | $(BUILD_PATH)
+$(BUILD_PATH)/tests.o: tests/tests.cpp tests/tester.hpp src/longnum.hpp | $(BUILD_PATH)
 	$(COMPILE) $< -c -o $@
 
 clean:

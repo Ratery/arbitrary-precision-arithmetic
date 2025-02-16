@@ -1,4 +1,4 @@
-#include "LongNum.hpp"
+#include "longnum.hpp"
 #include <iostream>
 #include <stdexcept>
 

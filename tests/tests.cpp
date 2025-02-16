@@ -1,5 +1,5 @@
 #include "tester.hpp"
-#include "../src/LongNum.hpp"
+#include "../src/longnum.hpp"
 #include <iostream>
 #include <stdexcept>
 

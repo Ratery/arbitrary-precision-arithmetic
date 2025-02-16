@@ -1,5 +1,5 @@
 #include "tester.hpp"
-#include <ostream>
+#include <print>
 #include <utility>
 
 Tester::Tester(std::string name) : group_name(std::move(name)) {}
